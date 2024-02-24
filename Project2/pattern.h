@@ -1,127 +1,206 @@
-#pragma once
 #include <iostream>
-#include <vector>
 #include <unordered_map>
 
 using namespace std;
 
 
-enum setState
+enum Weapon_for_clone
 {
-	MINIMUM = 1,
-	MEDIUM,
-	FULL
+	SWORD = 0,
+	BOW,
+	DAGGER
 };
 
 class Prototype
 {
 public:
 	Prototype() {};
-	virtual Prototype* cloneItem() const { return nullptr; };
+	virtual Prototype* clone() const { return 0; };
+};
 
-	static Prototype& getInstance()
+class Weapon
+{
+public:
+	virtual int fireRange() const = 0;
+	virtual string damageType() const = 0;
+	virtual int criticalDamageBonus() const = 0;
+	virtual ~Weapon() {};
+
+
+};
+
+class Sword : public Weapon, public Prototype
+{
+public:
+	Sword(int fire_range = 1, string damage_type = "Multi", int critical_damage_bonus = 5) : fire_range(fire_range), damage_type(damage_type), critical_damage_bonus(critical_damage_bonus) {};
+
+	int fireRange() const override
 	{
-		static Prototype instance;
+		return this->fire_range;
+	}
+	string damageType() const override
+	{
+		return this->damage_type;
+	}
+	int criticalDamageBonus() const override
+	{
+		return this->critical_damage_bonus;
+	}
+	Prototype* clone() const override
+	{
+		cout << "NEW SWORD" << endl;
+		return new Sword(this->fire_range, this->damage_type, this->critical_damage_bonus);
+	}
+
+private:
+	int fire_range;
+	string damage_type;
+	int critical_damage_bonus;
+};
+
+class Bow : public Weapon, public Prototype
+{
+public:
+	Bow(int fire_range = 10, string damage_type = "Single", int critical_damage_bonus = 3) : fire_range(fire_range), damage_type(damage_type), critical_damage_bonus(critical_damage_bonus) {};
+
+	int fireRange() const override
+	{
+		return this->fire_range;
+	}
+	string damageType() const override
+	{
+		return this->damage_type;
+	}
+	int criticalDamageBonus() const override
+	{
+		return this->critical_damage_bonus;
+	}
+	Prototype* clone() const override
+	{
+		cout << "NEW BOW" << endl;
+		return new Bow(this->fire_range, this->damage_type, this->critical_damage_bonus);
+	}
+
+private:
+	int fire_range;
+	string damage_type;
+	int critical_damage_bonus;
+};
+
+class Dagger : public Weapon, public Prototype
+{
+public:
+	Dagger(int fire_range = 1, string damage_type = "Single", int critical_damage_bonus = 5) : fire_range(fire_range), damage_type(damage_type), critical_damage_bonus(critical_damage_bonus) {};
+
+	int fireRange() const override
+	{
+		return this->fire_range;
+	}
+	string damageType() const override
+	{
+		return this->damage_type;
+	}
+	int criticalDamageBonus() const override
+	{
+		return this->critical_damage_bonus;
+	}
+	Prototype* clone() const override
+	{
+		cout << "NEW DAGGER" << endl;
+		return new Dagger(this->fire_range, this->damage_type, this->critical_damage_bonus);
+	}
+
+private:
+	int fire_range;
+	string damage_type;
+	int critical_damage_bonus;
+};
+
+class FactoryOfWeapon : public Prototype
+{
+public:
+	virtual Weapon* factoryMethod() const = 0;
+	virtual void createWeapon() const = 0;
+	virtual ~FactoryOfWeapon() {};
+
+	/*void CreateWeapon() const
+	{
+		Weapon* weapon = this->factoryMethod();
+		cout << "Created weapon with characteristics: \nFire range | Damage type | Bonus\n" << "    " << weapon->fireRange() << "\t\t" << weapon->damageType() << "\t     " << weapon->criticalDamageBonus() << "\t" << endl;
+	}*/
+private:
+};
+
+class FactoryOfSword : public FactoryOfWeapon
+{
+public:
+	Weapon* factoryMethod() const override
+	{
+		return new Sword();
+	}
+	void createWeapon() const override
+	{
+		Sword sword;
+		cout << "Created sword with characteristics: \nFire range | Damage type | Bonus\n" << "    " << sword.fireRange() << "\t\t" << sword.damageType() << "\t     " << sword.criticalDamageBonus() << "\t" << endl;
+	}
+};
+
+class FactoryOfBow : public FactoryOfWeapon
+{
+public:
+	Weapon* factoryMethod() const override
+	{
+		return new Bow();
+	}
+	void createWeapon() const override
+	{
+		Bow bow;
+		cout << "Created bow with characteristics: \nFire range | Damage type | Bonus\n" << "    " << bow.fireRange() << "\t\t" << bow.damageType() << "\t     " << bow.criticalDamageBonus() << "\t" << endl;
+	}
+};
+
+class FactoryOfDagger : public FactoryOfWeapon
+{
+public:
+	Weapon* factoryMethod() const override
+	{
+		return new Dagger();
+	}
+	void createWeapon() const override
+	{
+		Dagger dagger;
+		cout << "Created dagger with characteristics: \nFire range | Damage type | Bonus\n" << "    " << dagger.fireRange() << "\t\t" << dagger.damageType() << "\t     " << dagger.criticalDamageBonus() << "\t" << endl;
+	}
+};
+
+
+class PrototypeFactory
+{
+public:
+	PrototypeFactory()
+	{
+		prototypes[Weapon_for_clone::SWORD] = new Sword();
+		prototypes[Weapon_for_clone::BOW] = new Bow();
+		prototypes[Weapon_for_clone::DAGGER] = new Dagger();
+	}
+
+	static PrototypeFactory& getInstance()
+	{
+		static PrototypeFactory instance;
 		return instance;
 	}
-};
 
-class Product : public Prototype
-{
-public:
-	vector <string> parts;
-	void ListParts() const
+	Prototype* createClone(Weapon_for_clone weapon_for_clone)
 	{
-		cout << "Parts: ";
-		for (size_t i = 0; i < parts.size(); i++)
-		{
-			if (parts[i] == parts.back())
-			{
-				cout << parts[i] + "." << endl;
-			}
-			else
-			{
-				cout << parts[i] + ",";
-			}
-		}
-	}
-	Prototype* cloneItem() const override
-	{
-		Product* cloned_product = new Product();
-		cloned_product->parts = this->parts;
-		cout << "CLONED" << endl;
-		return cloned_product;
-	}
-};
-
-class Builder
-{
-public:
-	Builder()
-	{
-		this->reset();
-	};
-
-	Product* product;
-
-	void produceComponent1() const
-	{
-		this->product->parts.push_back("Part 1");
-	};
-	void produceComponent2() const
-	{
-		this->product->parts.push_back("Part 2");
-	};
-	void produceComponent3() const
-	{
-		this->product->parts.push_back("Part 3");
-	};
-	void reset()
-	{
-		this->product = new Product();
-	};
-
-	~Builder()
-	{
-		delete product;
+		return prototypes[weapon_for_clone]->clone();
 	}
 
-	Product* getProduct()
+	~PrototypeFactory()
 	{
-		Product* result = this->product;
-		this->reset();
-		return result;
+		prototypes.clear();
 	}
-};
 
 
-class Director : public Builder, public Prototype
-{
 private:
-	Builder* builder;
-
-public:
-	Director(Builder* builder) : builder(builder) {};
-	void setBuilder(Builder* builder)
-	{
-		this->builder = builder;
-	}
-	void buildMinimal()
-	{
-		this->builder->produceComponent1();
-	}
-	void buildMedium()
-	{
-		buildMinimal();
-		this->builder->produceComponent2();
-	}
-	void buildFull()
-	{
-		buildMedium();
-		this->builder->produceComponent3();
-	}
-	void showProduct() const
-	{
-		this->builder->product->ListParts();
-	}
+	unordered_map<Weapon_for_clone, Prototype*, hash<int>> prototypes;
 };
